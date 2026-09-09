@@ -1,5 +1,12 @@
-const chapters = ["intro", "letter", "video", "memories", "game", "finale"];
+const chapters = ["intro", "video", "memories", "game", "finale"];
 let tries = 2;
+const nicknames = ["peepee", "peep", "babe", "baobao", "baby", "princess", "baobei"];
+let nicknameIndex = 6;
+
+setInterval(() => {
+  nicknameIndex = (nicknameIndex + 1) % nicknames.length;
+  document.querySelector(".nickname").textContent = nicknames[nicknameIndex];
+}, 2200);
 
 // Replace these with your real questions and answers. correct is the zero-based answer number.
 const questions = [
@@ -25,7 +32,7 @@ function showChapter(id) {
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
-document.getElementById("openBtn").addEventListener("click", () => showChapter("letter"));
+document.getElementById("openBtn").addEventListener("click", () => showChapter("video"));
 document.querySelectorAll("[data-next]").forEach(btn => btn.addEventListener("click", () => showChapter(btn.dataset.next)));
 document.getElementById("replayBtn").addEventListener("click", () => { tries = 2; updateTries(); showChapter("intro"); });
 
