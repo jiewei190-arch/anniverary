@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#180b14" />
+  <meta name="description" content="A little anniversary surprise, made with love." />
+  <title>A Little Something For You</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Italiana&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="grain"></div>
+
+  <main>
+    <section class="scene intro" id="intro">
+      <p class="eyebrow">A private note · just for you</p>
+      <div class="envelope-wrap" aria-hidden="true">
+        <div class="envelope"><span class="seal">JW</span></div>
+      </div>
+      <h1>I made you<br><em>a little something.</em></h1>
+      <p class="intro-copy">Not because one day could ever hold everything I feel — but because you deserve to be reminded.</p>
+      <button class="primary" id="openBtn">Open my letter <span>♡</span></button>
+      <p class="sound-note">Best experienced with sound on</p>
+    </section>
+
+    <section class="scene letter hidden" id="letter">
+      <div class="chapter-label"><span>01</span> A note from me</div>
+      <div class="letter-card">
+        <p class="script">My love,</p>
+        <h2>Every ordinary day became my favorite memory when you were in it.</h2>
+        <p>There are a million little things I love about you—the way you make me laugh, the way you care, and the way being beside you somehow feels like home.</p>
+        <p>This is a small trip through some of our moments, made for my favorite person.</p>
+        <p class="signature">Always yours, <strong>Jie</strong></p>
+      </div>
+      <button class="primary" data-next="video">There’s more <span>↓</span></button>
+    </section>
+
+    <section class="scene video-scene hidden" id="video">
+      <div class="chapter-label"><span>02</span> Press play</div>
+      <div class="video-shell">
+        <video id="loveVideo" controls playsinline poster="">
+          <source src="assets/love-video.mp4" type="video/mp4" />
+        </video>
+        <div class="video-placeholder" id="videoPlaceholder">
+          <span>▶</span>
+          <h2>Your message goes here</h2>
+          <p>Add your video as <b>assets/love-video.mp4</b></p>
+        </div>
+      </div>
+      <button class="primary" data-next="memories">See our memories <span>↓</span></button>
+    </section>
+
+    <section class="scene memories hidden" id="memories">
+      <div class="chapter-label"><span>03</span> Us, in little moments</div>
+      <h2>A few pages from<br><em>my favorite story.</em></h2>
+      <div class="photo-grid" id="photoGrid"></div>
+      <p class="memory-note">And somehow, the best part is knowing we’re still only at the beginning.</p>
+      <button class="primary" data-next="game">One last surprise <span>✦</span></button>
+    </section>
+
+    <section class="scene game hidden" id="game">
+      <div class="chapter-label"><span>04</span> Unlock your gift</div>
+      <div class="game-card" id="gameCard">
+        <div class="tries"><span id="heart1">♥</span><span id="heart2">♥</span> <small id="triesText">2 tries left</small></div>
+        <h2>How well do you know us?</h2>
+        <p>Pick any question. Get one right and the surprise is yours—but you only get two tries total.</p>
+        <div class="question-picker" id="questionPicker"></div>
+        <div class="question-panel hidden" id="questionPanel">
+          <button class="back" id="backBtn">← Choose another</button>
+          <p class="question-number" id="questionNumber"></p>
+          <h3 id="questionText"></h3>
+          <div class="answers" id="answers"></div>
+        </div>
+        <p class="feedback" id="feedback" aria-live="polite"></p>
+      </div>
+    </section>
+
+    <section class="scene finale hidden" id="finale">
+      <div class="sparkles" aria-hidden="true">✦　♡　✦</div>
+      <p class="eyebrow">You got it, baby</p>
+      <h1>Your surprise<br><em>is waiting.</em></h1>
+      <div class="gift-card">
+        <span class="gift-icon">🎁</span>
+        <p class="gift-kicker">YOUR ANNIVERSARY GIFT</p>
+        <h2>A surprise date planned just for us</h2>
+        <p>Dress cute. I’ll handle everything else.</p>
+      </div>
+      <p class="final-note">I love you. Happy anniversary, baby. ♡</p>
+      <button class="ghost" id="replayBtn">Replay our story</button>
+    </section>
+  </main>
+
+  <div class="progress" aria-hidden="true"><span id="progressBar"></span></div>
+  <script src="script.js"></script>
+</body>
+</html>
