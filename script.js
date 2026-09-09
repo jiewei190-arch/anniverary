@@ -3,19 +3,27 @@ let tries = 2;
 let bonusUnlocked = false;
 let currentQuestionIndex = 0;
 const catLines = {
-  intro: ["Psst... peep! Tap me ♡", "Jie made all of this for you!", "Go open it, princess!"],
-  video: ["I’ll be quiet for this part 🥹", "Turn the sound up, baobao ♫"],
-  memories: ["You two are disgustingly cute ♡", "Okayyy main characters!", "Keep scrolling, peep! 🌸"],
-  game: ["Choose wisely, peepee 👀", "I definitely don’t know the answers...", "Two secret chances are hiding here!"],
-  finale: ["YOU DID IT!!!", "Happy anniversary, peep! ♡", "Now make Jie buy it 😼"]
+  intro: ["Psst... peep! Tap me ♡", "Jie has been tweaking this site for HOURS 😭", "He told me to call you peep!", "He’s probably staring at your reaction right now 👀", "He says you’re his favorite person.", "I promised Jie I wouldn’t spoil the gifts!", "If this makes you cry, Jie wins 😼"],
+  video: ["I’ll be quiet for this part 🥹", "Turn the sound up, baobao ♫", "He really wanted you to hear this.", "Okay I might cry too..."],
+  memories: ["You two are disgustingly cute ♡", "Okayyy main characters!", "Keep scrolling, peep! 🌸", "Jie picked these just for you.", "He said every memory with you matters.", "October 2 is kind of a big deal around here!"],
+  game: ["Choose wisely, peepee 👀", "I definitely don’t know the answers...", "Two secret chances are hiding here!", "Jie made me promise not to cheat.", "No pressure... only three gifts 😼"],
+  finale: ["YOU DID IT!!!", "Happy anniversary, peep! ♡", "Now make Jie buy it 😼", "I knew you’d get it!", "Jie is definitely smiling right now."]
 };
 let currentChapter = "intro";
+let catPoseIndex = 0;
+const catPoses = [
+  { src: "assets/chibi-cat-frame-0.png", action: "cat-sit" },
+  { src: "assets/chibi-cat-frame-0.png", action: "cat-nap" },
+  { src: "assets/chibi-cat-frame-3.png", action: "cat-wave" },
+  { src: "assets/chibi-cat-frame-2.png", action: "cat-stretch" },
+  { src: "assets/chibi-cat-frame-1.png", action: "cat-dance-once" },
+  { src: "assets/chibi-cat-frame-0.png", action: "cat-sit" }
+];
 
-// Replace these with your real questions and answers. correct is the zero-based answer number.
 const questions = [
-  { q: "Where did we have our first real date?", answers: ["Our favorite restaurant", "The place it all started", "A late-night adventure"], correct: 1 },
-  { q: "What is the nickname I use for you the most?", answers: ["Baby", "My love", "Pretty girl"], correct: 0 },
-  { q: "What do I love most about us?", answers: ["Our adventures", "How we always choose each other", "Our food dates"], correct: 1 }
+  { q: "Think about every single thing we’ve done together—what is my favorite memory of us?", match: "first-date", placeholder: "Type the memory..." },
+  { q: "What was the first thing we did when we got to Vegas?", match: "bathroom", placeholder: "Type what we did..." },
+  { q: "Which photo is my favorite of you? Enter the exact month, date, year, and time. Hint: it’s in your Favorites album and was taken with the Canon camera.", match: "photo-date", placeholder: "Example: Month DD, YYYY at 0:00 AM" }
 ];
 
 const gifts = [
@@ -69,7 +77,9 @@ memories.forEach((m, i) => {
 const secretMessages = [
   "One: you make ordinary days feel special ♡",
   "Two: you’re still the prettiest girl in every room ✦",
-  "Three: I’d choose you in every lifetime 🌸"
+  "Three: I’d choose you in every lifetime 🌸",
+  "Four: your smile is still my favorite notification 🎀",
+  "Five: plot twist—the biggest surprise is still coming 👀"
 ];
 document.querySelectorAll(".secret-heart").forEach((button, index) => {
   button.addEventListener("click", () => {
@@ -82,7 +92,7 @@ document.querySelectorAll(".secret-heart").forEach((button, index) => {
 });
 
 const cuteGarden = document.getElementById("cuteGarden");
-["🌸", "🎀", "♡", "✦", "🌷", "🫧", "🌸", "🎀", "♡", "✦", "🌷", "🫧"].forEach((symbol, index) => {
+["🌸", "🎀", "♡", "✦", "🌷", "🫧", "🐾", "🌺", "💗", "🐈‍⬛", "🌸", "🎀", "♡", "✦", "🌷", "🫧", "🐾", "🌺", "💗", "🐈‍⬛", "🌸", "🎀", "♡", "✦", "🌷", "🫧", "🐾", "🌺", "💗", "🐈‍⬛"].forEach((symbol, index) => {
   const floater = document.createElement("span");
   floater.textContent = symbol;
   floater.style.left = `${4 + (index * 17) % 92}%`;
@@ -90,6 +100,16 @@ const cuteGarden = document.getElementById("cuteGarden");
   floater.style.setProperty("--float-delay", `${(index % 6) * -.9}s`);
   floater.style.setProperty("--float-speed", `${5 + (index % 4)}s`);
   cuteGarden.appendChild(floater);
+});
+[0, 1, 2, 3, 0, 3].forEach((pose, index) => {
+  const kitty = document.createElement("img");
+  kitty.className = "garden-kitty";
+  kitty.src = `assets/chibi-cat-frame-${pose}.png`;
+  kitty.alt = "";
+  kitty.style.left = `${index % 2 ? 76 : 3}%`;
+  kitty.style.top = `${11 + index * 15}%`;
+  kitty.style.setProperty("--kitty-delay", `${index * -.8}s`);
+  cuteGarden.appendChild(kitty);
 });
 
 const revealObserver = new IntersectionObserver(entries => {
@@ -128,10 +148,32 @@ function openQuestion(index) {
   document.getElementById("questionNumber").textContent = `Question 0${index + 1}`;
   document.getElementById("questionText").textContent = item.q;
   const answers = document.getElementById("answers"); answers.innerHTML = "";
-  item.answers.forEach((answer, i) => {
-    const btn = document.createElement("button"); btn.className = "answer"; btn.textContent = answer;
-    btn.addEventListener("click", () => checkAnswer(i === item.correct)); answers.appendChild(btn);
-  });
+  const input = document.createElement("input");
+  input.className = "answer-input";
+  input.id = "answerInput";
+  input.placeholder = item.placeholder;
+  input.autocomplete = "off";
+  input.setAttribute("aria-label", "Your answer");
+  const submit = document.createElement("button");
+  submit.className = "answer-submit";
+  submit.textContent = "Lock in my answer ♡";
+  const submitAnswer = () => checkAnswer(answerMatches(input.value, item.match));
+  submit.addEventListener("click", submitAnswer);
+  input.addEventListener("keydown", event => { if (event.key === "Enter") submitAnswer(); });
+  answers.append(input, submit);
+  setTimeout(() => input.focus(), 150);
+}
+
+function answerMatches(value, match) {
+  const answer = value.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+  if (match === "first-date") return answer.includes("first") && answer.includes("date");
+  if (match === "bathroom") return answer.includes("bathroom") || answer.includes("restroom") || answer.includes("toilet");
+  if (match === "photo-date") {
+    const hasDate = answer.includes("july 25 2026") || answer.includes("7 25 2026") || answer.includes("07 25 2026");
+    const hasTime = answer.includes("8 06") && (answer.includes("am") || answer.includes("a m"));
+    return hasDate && hasTime;
+  }
+  return false;
 }
 
 document.getElementById("backBtn").addEventListener("click", () => {
@@ -170,11 +212,17 @@ const cat = document.getElementById("catButton");
 cat.addEventListener("click", () => {
   const lines = catLines[currentChapter];
   setCatLine(currentChapter, Math.floor(Math.random() * lines.length));
-  cat.classList.remove("boop");
-  void cat.offsetWidth;
-  cat.classList.add("boop");
+  nextCatPose();
   burstHearts(7);
 });
+
+function nextCatPose() {
+  catPoseIndex = (catPoseIndex + 1) % catPoses.length;
+  const pose = catPoses[catPoseIndex];
+  document.getElementById("catImage").src = pose.src;
+  cat.className = `cat-button ${pose.action}`;
+}
+setInterval(nextCatPose, 6500);
 
 function setCatLine(chapter, index) {
   const bubble = document.getElementById("catBubble");
