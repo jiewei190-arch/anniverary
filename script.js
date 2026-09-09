@@ -1,5 +1,6 @@
 const chapters = ["intro", "video", "memories", "game", "finale"];
 let tries = 2;
+let currentQuestionIndex = 0;
 const nicknames = ["peepee", "peep", "babe", "baobao", "baby", "princess", "baobei"];
 let nicknameIndex = 6;
 
@@ -13,6 +14,12 @@ const questions = [
   { q: "Where did we have our first real date?", answers: ["Our favorite restaurant", "The place it all started", "A late-night adventure"], correct: 1 },
   { q: "What is the nickname I use for you the most?", answers: ["Baby", "My love", "Pretty girl"], correct: 0 },
   { q: "What do I love most about us?", answers: ["Our adventures", "How we always choose each other", "Our food dates"], correct: 1 }
+];
+
+const gifts = [
+  { icon: "✈️", title: "A vacation for us", description: "Pack your bags, baobei. We’re making new memories together." },
+  { icon: "💎", title: "A Van Cleef necklace", description: "Something beautiful for my beautiful princess." },
+  { icon: "👜", title: "A purse", description: "A new purse picked especially for you, baby." }
 ];
 
 const memories = [
@@ -59,6 +66,7 @@ questions.forEach((item, i) => {
 });
 
 function openQuestion(index) {
+  currentQuestionIndex = index;
   const item = questions[index]; picker.classList.add("hidden");
   document.getElementById("questionPanel").classList.remove("hidden");
   document.getElementById("questionNumber").textContent = `Question 0${index + 1}`;
@@ -76,7 +84,15 @@ document.getElementById("backBtn").addEventListener("click", () => {
 });
 
 function checkAnswer(correct) {
-  if (correct) { document.getElementById("feedback").textContent = "That’s my girl ♡"; setTimeout(() => showChapter("finale"), 850); return; }
+  if (correct) {
+    const gift = gifts[currentQuestionIndex];
+    document.getElementById("giftIcon").textContent = gift.icon;
+    document.getElementById("giftTitle").textContent = gift.title;
+    document.getElementById("giftDescription").textContent = gift.description;
+    document.getElementById("feedback").textContent = "That’s my girl ♡";
+    setTimeout(() => showChapter("finale"), 850);
+    return;
+  }
   tries--; updateTries();
   const card = document.getElementById("gameCard"); card.classList.add("shake"); setTimeout(() => card.classList.remove("shake"), 400);
   const feedback = document.getElementById("feedback");
