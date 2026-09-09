@@ -22,12 +22,18 @@
       </div>
       <h1>Hey <em>peep</em>,<br>I made you something.</h1>
       <p class="intro-copy">Not because one day could ever hold everything I feel — but because you deserve to be reminded.</p>
+      <div class="home-play" aria-label="Three little surprises">
+        <button class="secret-heart" data-secret="1" aria-label="Open the first little secret">♡</button>
+        <button class="secret-heart" data-secret="2" aria-label="Open the second little secret">♡</button>
+        <button class="secret-heart" data-secret="3" aria-label="Open the third little secret">♡</button>
+      </div>
+      <p class="secret-message" id="secretMessage">Three tiny secrets are hiding here…</p>
       <button class="primary" id="openBtn">Open your surprise <span>♡</span></button>
       <p class="sound-note">Best experienced with sound on</p>
     </section>
 
     <section class="scene video-scene hidden" id="video">
-      <div class="chapter-label"><span>01</span> A message from me</div>
+      <div class="chapter-label"><span>02</span> A message from me</div>
       <div class="video-shell">
         <video id="loveVideo" controls playsinline poster="">
           <source src="assets/love-video.mp4" type="video/mp4" />
@@ -38,15 +44,17 @@
           <p>Add your video as <b>assets/love-video.mp4</b></p>
         </div>
       </div>
-      <button class="primary" data-next="memories">See our memories <span>↓</span></button>
+      <button class="primary" data-next="game">Unlock your surprise <span>✦</span></button>
     </section>
 
     <section class="scene memories hidden" id="memories">
-      <div class="chapter-label"><span>02</span> Us, in little moments</div>
+      <div class="cute-garden" id="cuteGarden" aria-hidden="true"></div>
+      <div class="chapter-label"><span>01</span> Us, in little moments</div>
       <h2>A few pages from<br><em>my favorite story.</em></h2>
+      <p class="scroll-hint">Keep scrolling, peep — every picture has a little magic ↓</p>
       <div class="photo-grid" id="photoGrid"></div>
       <p class="memory-note">And somehow, the best part is knowing we’re still only at the beginning.</p>
-      <button class="primary" data-next="game">One last surprise <span>✦</span></button>
+      <button class="primary" data-next="video">I have something to tell you <span>▶</span></button>
     </section>
 
     <section class="scene game hidden" id="game">

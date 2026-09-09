@@ -1,11 +1,11 @@
-const chapters = ["intro", "video", "memories", "game", "finale"];
+const chapters = ["intro", "memories", "video", "game", "finale"];
 let tries = 2;
 let bonusUnlocked = false;
 let currentQuestionIndex = 0;
 const catLines = {
   intro: ["Psst... peep! Tap me ♡", "Jie made all of this for you!", "Go open it, princess!"],
   video: ["I’ll be quiet for this part 🥹", "Turn the sound up, baobao ♫"],
-  memories: ["You two are disgustingly cute ♡", "Okayyy main characters!", "More memories loading..."],
+  memories: ["You two are disgustingly cute ♡", "Okayyy main characters!", "Keep scrolling, peep! 🌸"],
   game: ["Choose wisely, peepee 👀", "I definitely don’t know the answers...", "Two secret chances are hiding here!"],
   finale: ["YOU DID IT!!!", "Happy anniversary, peep! ♡", "Now make Jie buy it 😼"]
 };
@@ -46,7 +46,7 @@ function showChapter(id) {
 
 document.getElementById("openBtn").addEventListener("click", () => {
   document.getElementById("backgroundMusic").play().then(() => updateMusicButton(true)).catch(() => {});
-  showChapter("video");
+  showChapter("memories");
 });
 document.querySelectorAll("[data-next]").forEach(btn => btn.addEventListener("click", () => showChapter(btn.dataset.next)));
 document.getElementById("replayBtn").addEventListener("click", () => { tries = 2; bonusUnlocked = false; updateTries(); showChapter("intro"); });
@@ -58,12 +58,60 @@ video.addEventListener("error", () => document.getElementById("videoPlaceholder"
 const grid = document.getElementById("photoGrid");
 memories.forEach((m, i) => {
   const card = document.createElement("article");
-  card.className = "photo-card";
+  card.className = "photo-card photo-reveal";
   card.style.setProperty("--tilt", `${[-2, 2, -1, 1.5, -1.5][i]}deg`);
   const img = new Image(); img.src = m.file; img.alt = m.caption;
   img.onerror = () => { const f = document.createElement("div"); f.className = "photo-fallback"; f.textContent = m.fallback; img.replaceWith(f); };
   const caption = document.createElement("p"); caption.textContent = m.caption;
   card.append(img, caption); grid.appendChild(card);
+});
+
+const secretMessages = [
+  "One: you make ordinary days feel special ♡",
+  "Two: you’re still the prettiest girl in every room ✦",
+  "Three: I’d choose you in every lifetime 🌸"
+];
+document.querySelectorAll(".secret-heart").forEach((button, index) => {
+  button.addEventListener("click", () => {
+    button.classList.add("found");
+    button.textContent = "♥";
+    document.getElementById("secretMessage").textContent = secretMessages[index];
+    setCatLine("intro", Math.min(index, catLines.intro.length - 1));
+    burstHearts(10);
+  });
+});
+
+const cuteGarden = document.getElementById("cuteGarden");
+["🌸", "🎀", "♡", "✦", "🌷", "🫧", "🌸", "🎀", "♡", "✦", "🌷", "🫧"].forEach((symbol, index) => {
+  const floater = document.createElement("span");
+  floater.textContent = symbol;
+  floater.style.left = `${4 + (index * 17) % 92}%`;
+  floater.style.top = `${3 + (index * 29) % 91}%`;
+  floater.style.setProperty("--float-delay", `${(index % 6) * -.9}s`);
+  floater.style.setProperty("--float-speed", `${5 + (index % 4)}s`);
+  cuteGarden.appendChild(floater);
+});
+
+const revealObserver = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add("visible");
+      burstHearts(4);
+      revealObserver.unobserve(entry.target);
+    }
+  });
+}, { threshold: .28 });
+document.querySelectorAll(".photo-reveal").forEach(card => revealObserver.observe(card));
+
+document.addEventListener("pointerdown", event => {
+  if (event.target.closest("button")) return;
+  const sparkle = document.createElement("span");
+  sparkle.className = "tap-sparkle";
+  sparkle.textContent = Math.random() > .5 ? "✦" : "♡";
+  sparkle.style.left = `${event.clientX}px`;
+  sparkle.style.top = `${event.clientY}px`;
+  document.body.appendChild(sparkle);
+  setTimeout(() => sparkle.remove(), 850);
 });
 
 const picker = document.getElementById("questionPicker");
