@@ -54,7 +54,7 @@
       <div class="game-card" id="gameCard">
         <div class="tries"><span id="heart1">♥</span><span id="heart2">♥</span> <small id="triesText">2 tries left</small></div>
         <h2>How well do you know us?</h2>
-        <p>Pick any question. Get one right and the surprise is yours—but you only get two tries total.</p>
+        <p>Each question is hiding a different gift. Pick carefully—answer one correctly and the gift behind it is yours. You only get two tries total.</p>
         <div class="question-picker" id="questionPicker"></div>
         <div class="question-panel hidden" id="questionPanel">
           <button class="back" id="backBtn">← Choose another</button>
@@ -71,10 +71,10 @@
       <p class="eyebrow">You got it, baby</p>
       <h1>Your surprise<br><em>is waiting.</em></h1>
       <div class="gift-card">
-        <span class="gift-icon">🎁</span>
+        <span class="gift-icon" id="giftIcon">🎁</span>
         <p class="gift-kicker">YOUR ANNIVERSARY GIFT</p>
-        <h2>A surprise date planned just for us</h2>
-        <p>Dress cute. I’ll handle everything else.</p>
+        <h2 id="giftTitle">Your mystery gift</h2>
+        <p id="giftDescription">You chose perfectly, baobei.</p>
       </div>
       <p class="final-note">I love you. Happy October 2nd, princess. ♡</p>
       <button class="ghost" id="replayBtn">Replay our story</button>
