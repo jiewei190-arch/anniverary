@@ -1,5 +1,6 @@
 const chapters = ["intro", "video", "memories", "game", "finale"];
 let tries = 2;
+let bonusUnlocked = false;
 let currentQuestionIndex = 0;
 const nicknames = ["peepee", "peep", "babe", "baobao", "baby", "princess", "baobei"];
 let nicknameIndex = 6;
@@ -41,7 +42,7 @@ function showChapter(id) {
 
 document.getElementById("openBtn").addEventListener("click", () => showChapter("video"));
 document.querySelectorAll("[data-next]").forEach(btn => btn.addEventListener("click", () => showChapter(btn.dataset.next)));
-document.getElementById("replayBtn").addEventListener("click", () => { tries = 2; updateTries(); showChapter("intro"); });
+document.getElementById("replayBtn").addEventListener("click", () => { tries = 2; bonusUnlocked = false; updateTries(); showChapter("intro"); });
 
 const video = document.getElementById("loveVideo");
 video.addEventListener("loadeddata", () => document.getElementById("videoPlaceholder").style.display = "none");
@@ -97,11 +98,19 @@ function checkAnswer(correct) {
   const card = document.getElementById("gameCard"); card.classList.add("shake"); setTimeout(() => card.classList.remove("shake"), 400);
   const feedback = document.getElementById("feedback");
   if (tries === 1) feedback.textContent = "Come on baby, you got this! One more try ♡";
-  else { feedback.textContent = "No wayyy 😭 I’ll give you one tiny hint… try again, baby."; tries = 1; updateTries(); }
+  else if (!bonusUnlocked) {
+    bonusUnlocked = true;
+    tries = 2;
+    updateTries();
+    feedback.textContent = "Okay peepee 😭 surprise—you get 2 extra tries. I know you got this!";
+  } else {
+    feedback.textContent = "Baobei nooo 😭 come get a little hint from me, then try again.";
+    document.querySelectorAll(".answer").forEach(button => button.classList.add("disabled"));
+  }
 }
 
 function updateTries() {
   document.getElementById("heart1").classList.toggle("lost-heart", tries < 1);
   document.getElementById("heart2").classList.toggle("lost-heart", tries < 2);
-  document.getElementById("triesText").textContent = `${tries} ${tries === 1 ? "try" : "tries"} left`;
+  document.getElementById("triesText").textContent = `${tries} ${bonusUnlocked ? "bonus " : ""}${tries === 1 ? "try" : "tries"} left`;
 }
