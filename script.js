@@ -2,13 +2,14 @@ const chapters = ["intro", "video", "memories", "game", "finale"];
 let tries = 2;
 let bonusUnlocked = false;
 let currentQuestionIndex = 0;
-const nicknames = ["peepee", "peep", "babe", "baobao", "baby", "princess", "baobei"];
-let nicknameIndex = 6;
-
-setInterval(() => {
-  nicknameIndex = (nicknameIndex + 1) % nicknames.length;
-  document.querySelector(".nickname").textContent = nicknames[nicknameIndex];
-}, 2200);
+const catLines = {
+  intro: ["Psst... peep! Tap me ♡", "Jie made all of this for you!", "Go open it, princess!"],
+  video: ["I’ll be quiet for this part 🥹", "Turn the sound up, baobao ♫"],
+  memories: ["You two are disgustingly cute ♡", "Okayyy main characters!", "More memories loading..."],
+  game: ["Choose wisely, peepee 👀", "I definitely don’t know the answers...", "Two secret chances are hiding here!"],
+  finale: ["YOU DID IT!!!", "Happy anniversary, peep! ♡", "Now make Jie buy it 😼"]
+};
+let currentChapter = "intro";
 
 // Replace these with your real questions and answers. correct is the zero-based answer number.
 const questions = [
@@ -32,15 +33,21 @@ const memories = [
 ];
 
 function showChapter(id) {
+  currentChapter = id;
   document.querySelectorAll(".scene").forEach(s => s.classList.add("hidden"));
   const next = document.getElementById(id);
   next.classList.remove("hidden");
   next.classList.add("reveal");
   document.getElementById("progressBar").style.width = `${((chapters.indexOf(id) + 1) / chapters.length) * 100}%`;
   window.scrollTo({ top: 0, behavior: "smooth" });
+  setCatLine(id, 0);
+  burstHearts(14);
 }
 
-document.getElementById("openBtn").addEventListener("click", () => showChapter("video"));
+document.getElementById("openBtn").addEventListener("click", () => {
+  document.getElementById("backgroundMusic").play().then(() => updateMusicButton(true)).catch(() => {});
+  showChapter("video");
+});
 document.querySelectorAll("[data-next]").forEach(btn => btn.addEventListener("click", () => showChapter(btn.dataset.next)));
 document.getElementById("replayBtn").addEventListener("click", () => { tries = 2; bonusUnlocked = false; updateTries(); showChapter("intro"); });
 
@@ -91,6 +98,8 @@ function checkAnswer(correct) {
     document.getElementById("giftTitle").textContent = gift.title;
     document.getElementById("giftDescription").textContent = gift.description;
     document.getElementById("feedback").textContent = "That’s my girl ♡";
+    document.getElementById("catCompanion").classList.add("party");
+    burstHearts(36);
     setTimeout(() => showChapter("finale"), 850);
     return;
   }
@@ -106,6 +115,49 @@ function checkAnswer(correct) {
   } else {
     feedback.textContent = "Baobei nooo 😭 come get a little hint from me, then try again.";
     document.querySelectorAll(".answer").forEach(button => button.classList.add("disabled"));
+  }
+}
+
+const cat = document.getElementById("catButton");
+cat.addEventListener("click", () => {
+  const lines = catLines[currentChapter];
+  setCatLine(currentChapter, Math.floor(Math.random() * lines.length));
+  cat.classList.remove("boop");
+  void cat.offsetWidth;
+  cat.classList.add("boop");
+  burstHearts(7);
+});
+
+function setCatLine(chapter, index) {
+  const bubble = document.getElementById("catBubble");
+  bubble.textContent = catLines[chapter][index];
+  bubble.classList.remove("pop");
+  void bubble.offsetWidth;
+  bubble.classList.add("pop");
+}
+
+const music = document.getElementById("backgroundMusic");
+const musicToggle = document.getElementById("musicToggle");
+music.volume = 0.28;
+musicToggle.addEventListener("click", () => {
+  if (music.paused) music.play().then(() => updateMusicButton(true)).catch(() => {});
+  else { music.pause(); updateMusicButton(false); }
+});
+function updateMusicButton(playing) {
+  musicToggle.classList.toggle("playing", playing);
+  musicToggle.querySelector("b").textContent = playing ? "playing" : "our song";
+}
+
+function burstHearts(amount) {
+  const layer = document.getElementById("heartLayer");
+  for (let i = 0; i < amount; i++) {
+    const heart = document.createElement("i");
+    heart.textContent = ["♡", "♥", "✦"][i % 3];
+    heart.style.left = `${15 + Math.random() * 70}%`;
+    heart.style.setProperty("--drift", `${-80 + Math.random() * 160}px`);
+    heart.style.animationDelay = `${Math.random() * .25}s`;
+    layer.appendChild(heart);
+    setTimeout(() => heart.remove(), 2400);
   }
 }
 
