@@ -323,3 +323,7 @@ body {
   .intro .intro-copy { margin: 18px 0 18px; }
   .secret-message { margin-bottom: 16px; }
 }
+
+/* The cat stays quiet until she taps it */
+.cat-bubble { visibility: hidden; opacity: 0; transition: opacity .4s ease, visibility 0s linear .4s; }
+.cat-bubble.show { visibility: visible; opacity: 1; transition: opacity .2s ease; }

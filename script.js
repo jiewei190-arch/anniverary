@@ -54,7 +54,6 @@ function showChapter(id) {
   next.classList.add("reveal");
   document.getElementById("progressBar").style.width = `${((chapters.indexOf(id) + 1) / chapters.length) * 100}%`;
   window.scrollTo({ top: 0, behavior: "smooth" });
-  setCatLine(id, 0);
   setAmbient(id);
   burstHearts(14);
 }
@@ -105,7 +104,6 @@ document.querySelectorAll(".secret-heart").forEach((button, index) => {
     button.classList.add("found");
     button.textContent = "♥";
     document.getElementById("secretMessage").textContent = secretMessages[index];
-    setCatLine("intro", Math.min(index, catLines.intro.length - 1));
     burstHearts(10);
   });
 });
@@ -244,12 +242,16 @@ function nextCatPose() {
 }
 setInterval(nextCatPose, 6500);
 
+// The cat only talks when she taps it; the bubble fades away after a few seconds
+let catBubbleTimer;
 function setCatLine(chapter, index) {
   const bubble = document.getElementById("catBubble");
   bubble.textContent = catLines[chapter][index];
   bubble.classList.remove("pop");
   void bubble.offsetWidth;
-  bubble.classList.add("pop");
+  bubble.classList.add("pop", "show");
+  clearTimeout(catBubbleTimer);
+  catBubbleTimer = setTimeout(() => bubble.classList.remove("show"), 4000);
 }
 
 const music = document.getElementById("backgroundMusic");
@@ -709,7 +711,6 @@ reasons.forEach((text, i) => {
     burstHearts(5);
     if (reasonsFound === reasons.length) {
       setTimeout(() => confetti(160), 500);
-      document.getElementById("catBubble").textContent = "ALL TWELVE!! He means every one 🥹";
     }
   });
   reasonGrid.appendChild(card);
