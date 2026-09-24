@@ -341,6 +341,16 @@ function glowSprite(color) {
   g.fillStyle = grad; g.fillRect(0, 0, 64, 64);
   return (glowSprites[color] = c);
 }
+// Each heart color is drawn once (glow + shape) and then reused as an image every frame
+const heartSprites = {};
+function heartSprite(color) {
+  if (heartSprites[color]) return heartSprites[color];
+  const c = document.createElement("canvas"); c.width = c.height = 96;
+  const g = c.getContext("2d");
+  g.globalAlpha = .6; g.drawImage(glowSprite(color), 0, 0, 96, 96);
+  g.globalAlpha = 1; g.fillStyle = color; heartPath(g, 48, 48, 32); g.fill();
+  return (heartSprites[color] = c);
+}
 function heartPath(ctx, x, y, s) {
   ctx.beginPath();
   ctx.moveTo(x, y - s * .2);
@@ -352,8 +362,15 @@ function heartPath(ctx, x, y, s) {
 }
 
 function sizeSky() {
+  const oldW = W, oldH = H;
   W = skyCanvas.width = Math.round(innerWidth * dpr);
   H = skyCanvas.height = Math.round(innerHeight * dpr);
+  if (oldW && stars.length) {
+    const kx = W / oldW, ky = H / oldH;
+    [stars, motes, sparks, rockets].forEach(list => list.forEach(p => { p.x *= kx; p.y *= ky; }));
+    if (reducedMotion) drawSky(performance.now());
+    return;
+  }
   stars = Array.from({ length: Math.min(420, Math.round(innerWidth * innerHeight / 4200)) }, () => ({
     x: rand(W), y: rand(H), r: rand(1.4, .3) * dpr, p: rand(Math.PI * 2), s: rand(2.2, .6), z: rand(1, .2), warm: Math.random() > .75
   }));
@@ -389,15 +406,17 @@ function setAmbient(id) {
   skyMode = ambientModes[id] || "stars";
   motes = makeMotes(skyMode);
   rockets = []; sparks = []; nextRocket = 0;
-  modeFade = 0;
+  modeFade = reducedMotion ? 1 : 0;
+  if (reducedMotion) starAlpha = starVisibility[id] ?? 1;
   const bloom = document.getElementById("chapterBloom");
   bloom.classList.remove("play"); void bloom.offsetWidth; bloom.classList.add("play");
   if (reducedMotion) drawSky(performance.now());
 }
 
-function drawStars(t) {
+const ease = (rate, dt) => 1 - Math.pow(1 - rate, dt);
+function drawStars(t, dt) {
   const target = starVisibility[skyChapter] ?? 1;
-  starAlpha += (target - starAlpha) * .05;
+  starAlpha += (target - starAlpha) * ease(.05, dt);
   if (starAlpha < .01) return;
   const scroll = scrollY * dpr;
   stars.forEach(st => {
@@ -408,7 +427,7 @@ function drawStars(t) {
     sky.beginPath(); sky.arc(x, y, st.r, 0, Math.PI * 2); sky.fill();
   });
   const chance = shootingChance[skyChapter] || 0;
-  if (!shooting && Math.random() < chance) shooting = { x: rand(W * .7), y: rand(H * .4), life: 1 };
+  if (!shooting && Math.random() < ease(chance, dt)) shooting = { x: rand(W * .7), y: rand(H * .4), life: 1 };
   if (shooting) {
     const len = 140 * dpr;
     const g = sky.createLinearGradient(shooting.x, shooting.y, shooting.x - len, shooting.y - len * .45);
@@ -417,15 +436,15 @@ function drawStars(t) {
     sky.beginPath(); sky.moveTo(shooting.x, shooting.y); sky.lineTo(shooting.x - len, shooting.y - len * .45); sky.stroke();
     sky.globalAlpha = starAlpha * shooting.life;
     sky.drawImage(glowSprite("#ffe6ef"), shooting.x - 10 * dpr, shooting.y - 10 * dpr, 20 * dpr, 20 * dpr);
-    shooting.x += 15 * dpr; shooting.y += 6.7 * dpr; shooting.life -= .017;
+    shooting.x += 15 * dpr * dt; shooting.y += 6.7 * dpr * dt; shooting.life -= .017 * dt;
     if (shooting.life <= 0) shooting = null;
   }
 }
 
 const modeDrawers = {
-  bubbles(t) {
+  bubbles(t, dt) {
     motes.forEach(b => {
-      b.y += b.vy; b.wob += .012;
+      b.y += b.vy * dt; b.wob += .012 * dt;
       if (b.y < -b.r * 2) { b.y = H + b.r * 2; b.x = rand(W); }
       const x = b.x + Math.sin(b.wob) * 14 * dpr + parallax.x * 30 * b.z * dpr;
       const y = b.y + parallax.y * 30 * b.z * dpr;
@@ -446,39 +465,38 @@ const modeDrawers = {
       sky.strokeStyle = b.color + "aa"; sky.lineWidth = 1.2 * dpr; sky.stroke();
     });
   },
-  hearts(t) {
+  hearts(t, dt) {
     motes.forEach(h => {
-      h.y += h.vy;
+      h.y += h.vy * dt;
       if (h.y < -h.size * 2) { h.y = H + h.size * 2; h.x = rand(W); }
       const x = h.x + Math.sin(t / 1400 * h.s + h.p) * 18 * dpr + parallax.x * 28 * h.z * dpr;
       const y = h.y + parallax.y * 28 * h.z * dpr;
-      const pulse = .8 + .2 * Math.sin(t / 500 + h.p);
-      sky.globalAlpha = modeFade * h.a * .6;
-      sky.drawImage(glowSprite(h.color), x - h.size * 1.5, y - h.size * 1.5, h.size * 3, h.size * 3);
+      const box = h.size * 3 * (.8 + .2 * Math.sin(t / 500 + h.p));
       sky.save(); sky.translate(x, y); sky.rotate(h.rot + Math.sin(t / 1800 + h.p) * .15);
-      sky.globalAlpha = modeFade * h.a; sky.fillStyle = h.color;
-      heartPath(sky, 0, 0, h.size * pulse); sky.fill(); sky.restore();
+      sky.globalAlpha = modeFade * h.a;
+      sky.drawImage(heartSprite(h.color), -box / 2, -box / 2, box, box); sky.restore();
     });
   },
-  dust(t) {
-    const cx = W / 2 + Math.sin(t / 5200) * W * .03;
+  dust(t, dt) {
+    // Same cone as the CSS projector beam: apex 12% above the top edge, about 24 degrees each side
+    const cx = W / 2, apexY = -.12 * H, spread = Math.tan(28 * Math.PI / 180);
     motes.forEach(m => {
-      m.x += m.vx + Math.sin(t / 2400 + m.p) * .08 * dpr; m.y += m.vy;
+      m.x += (m.vx + Math.sin(t / 2400 + m.p) * .08 * dpr) * dt; m.y += m.vy * dt;
       if (m.x < 0) m.x += W; if (m.x > W) m.x -= W; if (m.y < 0) m.y += H; if (m.y > H) m.y -= H;
-      const halfWidth = (m.y / H) * W * .24 + 30 * dpr;
+      const halfWidth = (m.y - apexY) * spread + 20 * dpr;
       const inBeam = Math.max(0, 1 - Math.abs(m.x - cx) / halfWidth);
       const flick = .6 + .4 * Math.sin(t / 900 + m.p);
-      sky.globalAlpha = modeFade * (.08 + .8 * inBeam) * flick;
+      sky.globalAlpha = modeFade * (.18 + .75 * inBeam) * flick;
       const x = m.x + parallax.x * 16 * m.z * dpr, y = m.y + parallax.y * 16 * m.z * dpr;
       if (inBeam > .5 && m.r > 1.3 * dpr) sky.drawImage(glowSprite("#ffe2c8"), x - m.r * 4, y - m.r * 4, m.r * 8, m.r * 8);
       sky.fillStyle = "#ffe9d6"; sky.beginPath(); sky.arc(x, y, m.r, 0, Math.PI * 2); sky.fill();
     });
   },
-  constellation(t) {
+  constellation(t, dt) {
     const link = 140 * dpr, reach = 190 * dpr;
     const pointerOn = pointer.active && t - pointer.last < 2500;
     motes.forEach(p => {
-      p.x += p.vx; p.y += p.vy;
+      p.x += p.vx * dt; p.y += p.vy * dt;
       if (p.x < 0 || p.x > W) p.vx *= -1;
       if (p.y < 0 || p.y > H) p.vy *= -1;
     });
@@ -500,7 +518,7 @@ const modeDrawers = {
         if (d < reach) {
           const k = Math.min(3, Math.floor(d / reach * 4));
           pointerLines[k].moveTo(a.x, a.y); pointerLines[k].lineTo(pointer.x, pointer.y);
-          a.x += (pointer.x - a.x) * .002; a.y += (pointer.y - a.y) * .002;
+          a.x += (pointer.x - a.x) * .002 * dt; a.y += (pointer.y - a.y) * .002 * dt;
         }
       }
     }
@@ -514,13 +532,13 @@ const modeDrawers = {
       sky.fillStyle = "#fff4e2"; sky.beginPath(); sky.arc(p.x, p.y, p.r * .8, 0, Math.PI * 2); sky.fill();
     });
   },
-  fireworks(t) {
+  fireworks(t, dt) {
     if (t > nextRocket) {
       rockets.push({ x: rand(W * .85, W * .15), y: H + 10, vy: -rand(13, 9) * dpr, top: rand(H * .5, H * .12), color: pick(["#e78b9e", "#e8c48d", "#f4b6c8", "#ffd9e4", "#d75b7f"]), heart: Math.random() < .4 });
       nextRocket = t + rand(1900, 900);
     }
     rockets = rockets.filter(r => {
-      r.y += r.vy; r.vy *= .985;
+      r.y += r.vy * dt; r.vy *= Math.pow(.985, dt);
       sky.globalAlpha = modeFade * .9;
       sky.drawImage(glowSprite("#fff0dd"), r.x - 7 * dpr, r.y - 7 * dpr, 14 * dpr, 14 * dpr);
       sky.fillStyle = "#fff0dd"; sky.fillRect(r.x - dpr, r.y, 2 * dpr, 16 * dpr);
@@ -542,7 +560,8 @@ const modeDrawers = {
     });
     sky.lineWidth = 1.8 * dpr; sky.lineCap = "round";
     sparks = sparks.filter(s => {
-      s.vx *= .975; s.vy = s.vy * .975 + .035 * dpr; s.x += s.vx; s.y += s.vy; s.life -= s.decay;
+      const drag = Math.pow(.975, dt);
+      s.vx *= drag; s.vy = s.vy * drag + .035 * dpr * dt; s.x += s.vx * dt; s.y += s.vy * dt; s.life -= s.decay * dt;
       if (s.life <= 0) return false;
       sky.globalAlpha = modeFade * s.life * .9;
       sky.strokeStyle = s.color;
@@ -550,15 +569,15 @@ const modeDrawers = {
       return true;
     });
   },
-  fireflies(t) {
+  fireflies(t, dt) {
     const pointerOn = pointer.active && t - pointer.last < 2500;
     motes.forEach(f => {
-      f.a += rand(.18, -.18);
+      f.a += rand(.18, -.18) * Math.sqrt(dt);
       if (pointerOn) {
         const dx = pointer.x - f.x, dy = pointer.y - f.y;
-        if (Math.hypot(dx, dy) < 260 * dpr) f.a += Math.sin(Math.atan2(dy, dx) - f.a) * .06;
+        if (Math.hypot(dx, dy) < 260 * dpr) f.a += Math.sin(Math.atan2(dy, dx) - f.a) * .06 * dt;
       }
-      f.x += Math.cos(f.a) * f.sp; f.y += Math.sin(f.a) * f.sp;
+      f.x += Math.cos(f.a) * f.sp * dt; f.y += Math.sin(f.a) * f.sp * dt;
       if (f.x < -40) f.x = W + 40; if (f.x > W + 40) f.x = -40;
       if (f.y < -40) f.y = H + 40; if (f.y > H + 40) f.y = -40;
       const glow = .3 + .7 * Math.pow(0.5 + 0.5 * Math.sin(t / 800 * f.s + f.p), 2);
@@ -570,13 +589,16 @@ const modeDrawers = {
   stars() {}
 };
 
+let lastSkyT = 0;
 function drawSky(t) {
+  const dt = lastSkyT ? Math.min(3, (t - lastSkyT) / 16.667) : 1;
+  lastSkyT = t;
   sky.clearRect(0, 0, W, H);
-  modeFade = Math.min(1, modeFade + .02);
-  parallax.x += (pointer.nx - parallax.x) * .05;
-  parallax.y += (pointer.ny - parallax.y) * .05;
-  drawStars(t);
-  modeDrawers[skyMode](t);
+  modeFade = Math.min(1, modeFade + .02 * dt);
+  parallax.x += (pointer.nx - parallax.x) * ease(.05, dt);
+  parallax.y += (pointer.ny - parallax.y) * ease(.05, dt);
+  drawStars(t, dt);
+  modeDrawers[skyMode](t, dt);
   sky.globalAlpha = 1;
   const scrollVar = Math.round(scrollY);
   if (scrollVar !== lastScrollVar) { ambientEl.style.setProperty("--sy", scrollVar); lastScrollVar = scrollVar; }
@@ -602,7 +624,7 @@ for (let i = 0; i < 14; i++) {
   orb.style.setProperty("--rise", `${22 + (i * 7) % 18}s`);
   orb.style.setProperty("--delay", `${-(i * 3.1) % 30}s`);
   orb.style.setProperty("--drift", `${((i % 5) - 2) * 30}px`);
-  orb.style.setProperty("--o", `${.1 + (i % 4) * .06}`);
+  orb.style.setProperty("--o", `${.14 + (i % 4) * .06}`);
   bokehLayer.appendChild(orb);
 }
 
