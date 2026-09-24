@@ -12,13 +12,20 @@
   <link rel="stylesheet" href="style.css" />
   <link rel="stylesheet" href="style-extra.css" />
   <link rel="stylesheet" href="style-deluxe.css" />
+  <link rel="stylesheet" href="style-ambient.css" />
 </head>
-<body>
+<body data-chapter="intro">
   <div class="preloader" id="preloader" aria-hidden="true">
     <div class="preloader-heart">♥</div>
     <p>wrapping up something special…</p>
   </div>
-  <canvas class="starfield" id="starfield" aria-hidden="true"></canvas>
+  <div class="ambient" id="ambient" aria-hidden="true">
+    <div class="aurora"><i></i><i></i><i></i><i></i></div>
+    <div class="ambient-beam"></div>
+    <div class="bokeh" id="bokeh"></div>
+    <canvas class="starfield" id="starfield"></canvas>
+    <div class="vignette"></div>
+  </div>
   <div class="petal-layer" id="petalLayer" aria-hidden="true"></div>
   <div class="grain"></div>
 
@@ -153,6 +160,7 @@
     <button class="lightbox-close" id="lightboxClose" aria-label="Close">×</button>
   </div>
   <canvas class="confetti" id="confetti" aria-hidden="true"></canvas>
+  <div class="chapter-bloom" id="chapterBloom" aria-hidden="true"></div>
 
   <div class="progress" aria-hidden="true"><span id="progressBar"></span></div>
   <script src="script.js"></script>
