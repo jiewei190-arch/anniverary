@@ -8,18 +8,29 @@
   <title>A Little Something For You</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Italiana&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=DM+Sans:wght@400;500;600&family=Italiana&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
   <link rel="stylesheet" href="style-extra.css" />
+  <link rel="stylesheet" href="style-deluxe.css" />
 </head>
 <body>
+  <div class="preloader" id="preloader" aria-hidden="true">
+    <div class="preloader-heart">♥</div>
+    <p>wrapping up something special…</p>
+  </div>
+  <canvas class="starfield" id="starfield" aria-hidden="true"></canvas>
+  <div class="petal-layer" id="petalLayer" aria-hidden="true"></div>
   <div class="grain"></div>
 
   <main>
     <section class="scene intro" id="intro">
       <p class="eyebrow">October 2 · our day</p>
-      <div class="envelope-wrap" aria-hidden="true">
-        <div class="envelope"><span class="seal">JW</span></div>
+      <p class="countdown-pill" id="countdown">♡</p>
+      <div class="envelope-wrap" id="envelope" aria-hidden="true">
+        <div class="envelope-letter"><span>for my peep</span>♡</div>
+        <div class="envelope"></div>
+        <div class="envelope-flap"></div>
+        <span class="seal">JW</span>
       </div>
       <h1>Hey <em>peep</em>,<br>I made you something.</h1>
       <p class="intro-copy">Not because one day could ever hold everything I feel — but because you deserve to be reminded.</p>
@@ -36,7 +47,7 @@
     </section>
 
     <section class="scene video-scene hidden" id="video">
-      <div class="chapter-label"><span>02</span> A message from me</div>
+      <div class="chapter-label"><span>03</span> A message from me</div>
       <div class="video-shell">
         <video id="loveVideo" controls playsinline poster="">
           <source src="assets/love-video.mp4" type="video/mp4" />
@@ -57,11 +68,19 @@
       <p class="scroll-hint">Keep scrolling, peep — every picture has a little magic ↓</p>
       <div class="photo-grid" id="photoGrid"></div>
       <p class="memory-note">And somehow, the best part is knowing we’re still only at the beginning.</p>
+      <button class="primary" data-next="reasons">There’s more, peep <span>♡</span></button>
+    </section>
+
+    <section class="scene reasons hidden" id="reasons">
+      <div class="chapter-label"><span>02</span> Not even close to all of them</div>
+      <h2>Little reasons<br><em>I love you.</em></h2>
+      <p class="reasons-hint">Tap each card to flip it · <b id="reasonCount">0</b> of <b id="reasonTotal">12</b> found</p>
+      <div class="reason-grid" id="reasonGrid"></div>
       <button class="primary" data-next="video">I have something to tell you <span>▶</span></button>
     </section>
 
     <section class="scene game hidden" id="game">
-      <div class="chapter-label"><span>03</span> Unlock your gift</div>
+      <div class="chapter-label"><span>04</span> Unlock your gift</div>
       <div class="game-card" id="gameCard">
         <div class="tries"><span id="heart1">♥</span><span id="heart2">♥</span> <small id="triesText">2 tries left</small></div>
         <h2>How well do you know us?</h2>
@@ -81,13 +100,34 @@
       <div class="sparkles" aria-hidden="true">✦　♡　✦</div>
       <p class="eyebrow">You got it, baby</p>
       <h1>Your surprise<br><em>is waiting.</em></h1>
-      <div class="gift-card">
+      <button class="gift-box" id="giftBox" aria-label="Unwrap your gift">
+        <span class="box-lid"></span>
+        <span class="box-body"></span>
+        <span class="box-bow"><i></i><i></i></span>
+      </button>
+      <p class="gift-tap" id="giftTap">Tap to unwrap ♡</p>
+      <div class="gift-card" id="giftCard">
         <span class="gift-icon" id="giftIcon">🎁</span>
         <p class="gift-kicker">YOUR ANNIVERSARY GIFT</p>
         <h2 id="giftTitle">Your mystery gift</h2>
         <p id="giftDescription">You chose perfectly, baobei.</p>
       </div>
       <p class="final-note">I love you. Happy October 2nd, princess. ♡</p>
+      <button class="primary" data-next="letter">One last thing… <span>✉</span></button>
+    </section>
+
+    <section class="scene letter hidden" id="letter">
+      <div class="chapter-label"><span>05</span> A letter for you</div>
+      <article class="letter-card">
+        <p class="script">My peep,</p>
+        <h2>Happy anniversary, princess.</h2>
+        <p>I wanted to make you something you could come back to — a little place on the internet that’s just ours. Every picture, every silly question, every tiny secret on the first page was put here for you.</p>
+        <p>You make my ordinary days feel like the good part of a movie. You’re the first person I want to tell things to, the one I want next to me when things are hard, and the reason so many of my favorite memories exist at all.</p>
+        <p>Thank you for your patience, your laugh, your hugs, and for choosing me — even on the days I’m a little hard to choose. I don’t take a single bit of it for granted.</p>
+        <p>October 2 is my favorite day on the calendar, baobei, but honestly every day with you is a little bit of a celebration.</p>
+        <p>Here’s to more trips, more photos, more late-night talks, and more of us. I love you so much.</p>
+        <p class="signature">Forever yours,<br><span>Jie</span></p>
+      </article>
       <button class="ghost" id="replayBtn">Replay our story</button>
     </section>
   </main>
@@ -104,6 +144,15 @@
     <source src="assets/this-is-how-you-fall-in-love.mp3" type="audio/mpeg" />
   </audio>
   <div class="heart-layer" id="heartLayer" aria-hidden="true"></div>
+
+  <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Memory">
+    <figure>
+      <div id="lightboxMedia"></div>
+      <figcaption id="lightboxCaption"></figcaption>
+    </figure>
+    <button class="lightbox-close" id="lightboxClose" aria-label="Close">×</button>
+  </div>
+  <canvas class="confetti" id="confetti" aria-hidden="true"></canvas>
 
   <div class="progress" aria-hidden="true"><span id="progressBar"></span></div>
   <script src="script.js"></script>
