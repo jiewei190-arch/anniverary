@@ -314,6 +314,45 @@ function updateMusicButton(playing) {
   musicToggle.querySelector("b").textContent = playing ? "playing" : "our song";
 }
 
+// Our song keeps playing under the videos, just quieter. iPhones ignore audio.volume,
+// so there the song goes through a Web Audio gain node instead (set up on her first tap).
+const MUSIC_VOLUME = 0.28, MUSIC_UNDER_VIDEO = 0.07;
+let musicGain = null, musicCtx = null, musicVolumeTimer, videosPlaying = 0;
+const volumeIsFixed = (() => { const before = music.volume; music.volume = 0.5; const fixed = music.volume !== 0.5; music.volume = before; return fixed; })();
+function setupMusicGain() {
+  if (!volumeIsFixed || musicGain) return;
+  try {
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    musicCtx = new Ctx();
+    musicGain = musicCtx.createGain();
+    musicGain.gain.value = MUSIC_VOLUME;
+    musicCtx.createMediaElementSource(music).connect(musicGain).connect(musicCtx.destination);
+  } catch (error) { musicGain = null; }
+}
+function fadeMusicTo(target) {
+  if (musicGain) {
+    const now = musicCtx.currentTime;
+    musicGain.gain.cancelScheduledValues(now);
+    musicGain.gain.setValueAtTime(musicGain.gain.value, now);
+    musicGain.gain.linearRampToValueAtTime(target, now + .8);
+    return;
+  }
+  clearInterval(musicVolumeTimer);
+  musicVolumeTimer = setInterval(() => {
+    const step = (target - music.volume) * .25;
+    if (Math.abs(target - music.volume) < .005) { music.volume = target; clearInterval(musicVolumeTimer); }
+    else music.volume = Math.min(1, Math.max(0, music.volume + step));
+  }, 50);
+}
+function musicUnderVideo(videoEl) {
+  let active = false;
+  const on = () => { if (!active) { active = true; videosPlaying++; } fadeMusicTo(MUSIC_UNDER_VIDEO); };
+  const off = () => { if (active) { active = false; videosPlaying--; } if (!videosPlaying) fadeMusicTo(MUSIC_VOLUME); };
+  videoEl.addEventListener("play", on);
+  ["pause", "ended", "emptied"].forEach(type => videoEl.addEventListener(type, off));
+  return off;
+}
+
 function burstHearts(amount) {
   const layer = document.getElementById("heartLayer");
   for (let i = 0; i < amount; i++) {
@@ -337,12 +376,14 @@ function updateTries() {
 
 // Background music: try to start right away, otherwise on her very first tap anywhere
 function startMusic() {
+  if (musicCtx && musicCtx.state === "suspended") musicCtx.resume();
   if (!music.paused) return;
   music.play().then(() => updateMusicButton(true)).catch(() => {});
 }
 startMusic();
 ["pointerdown", "keydown", "touchstart"].forEach(type => document.addEventListener(type, event => {
-  if (event.target.closest && event.target.closest("#musicToggle")) return;
+  setupMusicGain();
+  if (event.target.closest && event.target.closest("#musicToggle")) { if (musicCtx) musicCtx.resume(); return; }
   startMusic();
 }, { once: true, capture: true }));
 
@@ -721,8 +762,7 @@ function openLightbox(mediaEl, caption) {
   if (copy.tagName === "VIDEO") {
     // Full edit with sound: our song steps aside while it plays
     copy.muted = false; copy.loop = false; copy.controls = true; copy.removeAttribute("muted");
-    copy.addEventListener("play", () => { lightboxMusicWasPlaying = !music.paused; music.pause(); updateMusicButton(false); });
-    copy.addEventListener("pause", () => { if (lightboxMusicWasPlaying) startMusic(); });
+    musicUnderVideo(copy);
     copy.currentTime = 0;
     copy.play().catch(() => {});
   }
@@ -730,7 +770,6 @@ function openLightbox(mediaEl, caption) {
   lightbox.classList.add("show");
   burstHearts(6);
 }
-let lightboxMusicWasPlaying = false;
 function closeLightbox() {
   const playing = document.querySelector("#lightboxMedia video");
   if (playing) playing.pause();
@@ -837,7 +876,5 @@ function drawConfetti() {
   else { confettiRunning = false; confettiCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height); }
 }
 
-// Let the video have the spotlight, then bring our song back
-let musicWasPlaying = false;
-video.addEventListener("play", () => { musicWasPlaying = !music.paused; music.pause(); updateMusicButton(false); });
-["pause", "ended"].forEach(type => video.addEventListener(type, () => { if (musicWasPlaying) startMusic(); }));
+// Keep our song playing softly under the message video
+musicUnderVideo(video);
