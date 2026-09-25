@@ -8,18 +8,36 @@
   <title>A Little Something For You</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Italiana&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=DM+Sans:wght@400;500;600&family=Italiana&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
   <link rel="stylesheet" href="style-extra.css" />
+  <link rel="stylesheet" href="style-deluxe.css" />
+  <link rel="stylesheet" href="style-ambient.css" />
 </head>
-<body>
+<body data-chapter="intro">
+  <div class="preloader" id="preloader" aria-hidden="true">
+    <div class="preloader-heart">♥</div>
+    <p>wrapping up something special…</p>
+  </div>
+  <div class="ambient" id="ambient" aria-hidden="true">
+    <div class="aurora"><i></i><i></i><i></i><i></i></div>
+    <div class="ambient-beam"></div>
+    <div class="bokeh" id="bokeh"></div>
+    <canvas class="starfield" id="starfield"></canvas>
+    <div class="vignette"></div>
+  </div>
+  <div class="petal-layer" id="petalLayer" aria-hidden="true"></div>
   <div class="grain"></div>
 
   <main>
     <section class="scene intro" id="intro">
       <p class="eyebrow">October 2 · our day</p>
-      <div class="envelope-wrap" aria-hidden="true">
-        <div class="envelope"><span class="seal">JW</span></div>
+      <p class="countdown-pill" id="countdown">♡</p>
+      <div class="envelope-wrap" id="envelope" aria-hidden="true">
+        <div class="envelope-letter"><span>for my peep</span>♡</div>
+        <div class="envelope"></div>
+        <div class="envelope-flap"></div>
+        <span class="seal">JW</span>
       </div>
       <h1>Hey <em>peep</em>,<br>I made you something.</h1>
       <p class="intro-copy">Not because one day could ever hold everything I feel — but because you deserve to be reminded.</p>
@@ -36,7 +54,7 @@
     </section>
 
     <section class="scene video-scene hidden" id="video">
-      <div class="chapter-label"><span>02</span> A message from me</div>
+      <div class="chapter-label"><span>03</span> A message from me</div>
       <div class="video-shell">
         <video id="loveVideo" controls playsinline poster="">
           <source src="assets/love-video.mp4" type="video/mp4" />
@@ -54,14 +72,23 @@
       <div class="cute-garden" id="cuteGarden" aria-hidden="true"></div>
       <div class="chapter-label"><span>01</span> Us, in little moments</div>
       <h2>A few pages from<br><em>my favorite story.</em></h2>
-      <p class="scroll-hint">Keep scrolling, peep — every picture has a little magic ↓</p>
+      <p class="scroll-hint">Tap each photo to turn it over, peep — every one is hiding a word ↻<br><b id="photoCount">0</b> of <b id="photoTotal">10</b> turned over</p>
       <div class="photo-grid" id="photoGrid"></div>
+      <p class="photo-sentence" id="photoSentence" aria-live="polite"></p>
       <p class="memory-note">And somehow, the best part is knowing we’re still only at the beginning.</p>
+      <button class="primary" data-next="reasons">There’s more, peep <span>♡</span></button>
+    </section>
+
+    <section class="scene reasons hidden" id="reasons">
+      <div class="chapter-label"><span>02</span> Not even close to all of them</div>
+      <h2>Little reasons<br><em>I love you.</em></h2>
+      <p class="reasons-hint">Tap each card to flip it · <b id="reasonCount">0</b> of <b id="reasonTotal">12</b> found</p>
+      <div class="reason-grid" id="reasonGrid"></div>
       <button class="primary" data-next="video">I have something to tell you <span>▶</span></button>
     </section>
 
     <section class="scene game hidden" id="game">
-      <div class="chapter-label"><span>03</span> Unlock your gift</div>
+      <div class="chapter-label"><span>04</span> Unlock your gift</div>
       <div class="game-card" id="gameCard">
         <div class="tries"><span id="heart1">♥</span><span id="heart2">♥</span> <small id="triesText">2 tries left</small></div>
         <h2>How well do you know us?</h2>
@@ -75,25 +102,52 @@
         </div>
         <p class="feedback" id="feedback" aria-live="polite"></p>
       </div>
+      <button class="ghost letter-open" data-letter>Read my letter ✉</button>
     </section>
 
     <section class="scene finale hidden" id="finale">
       <div class="sparkles" aria-hidden="true">✦　♡　✦</div>
       <p class="eyebrow">You got it, baby</p>
       <h1>Your surprise<br><em>is waiting.</em></h1>
-      <div class="gift-card">
+      <button class="gift-box" id="giftBox" aria-label="Unwrap your gift">
+        <span class="box-lid"></span>
+        <span class="box-body"></span>
+        <span class="box-bow"><i></i><i></i></span>
+      </button>
+      <p class="gift-tap" id="giftTap">Tap to unwrap ♡</p>
+      <div class="gift-card" id="giftCard">
         <span class="gift-icon" id="giftIcon">🎁</span>
         <p class="gift-kicker">YOUR ANNIVERSARY GIFT</p>
         <h2 id="giftTitle">Your mystery gift</h2>
         <p id="giftDescription">You chose perfectly, baobei.</p>
       </div>
       <p class="final-note">I love you. Happy October 2nd, princess. ♡</p>
-      <button class="ghost" id="replayBtn">Replay our story</button>
+      <button class="primary" data-letter>One last thing… <span>✉</span></button>
+    </section>
+
+    <section class="scene letter hidden" id="letter">
+      <button class="back letter-back" data-letter-back>← Back</button>
+      <div class="chapter-label"><span>05</span> A letter for you</div>
+      <article class="letter-card">
+        <p class="script">My baby girl,</p>
+        <h2>Happy anniversary, princess.</h2>
+        <p>It’s been 2 years since we’ve been together and I have to say it was the best 2 years of my life. Even though there are days where we are mad at each other and annoyed at each other I still love you. I can never be mad at the person I love with all of my heart for longer than 10 minutes!</p>
+        <p>I want to thank you for spending more than 2 years together with me I really appreciate you giving me a chance to be your boyfriend! I know i may not be a good boyfriend at times but I will try my best to improve okay!</p>
+        <p>By the time you read this message it will officially be our 2nd year anniversary crazy how fast time has gone by it doesn’t even feel like 2 years it felt like we just started dating ahahahahha.</p>
+        <p>I love you my baby and will always love you for the rest of my life like what the back of the photos said. There will be ups and downs in our relationship but I promise as long as we have 2 hands and 10 fingers holding each other we will never let each other go and will get through it together. Like I said the meaning behind our anniversary is to hold each other with 2 hands and 10 fingers.</p>
+        <p>I love you my pretty baby! Cheers to 78 more years! Where we will die right next to each other on our death bed once again holding our hands and not letting go until the very end.</p>
+        <p>For our second year anniversary I want to give you a gift that I’ve always wanted to give you since our first year anniversary. Enjoy it! I love you muahhhhhh</p>
+        <p class="signature">Forever yours,<br><span>Jie</span></p>
+      </article>
+      <div class="letter-actions">
+        <button class="primary" data-letter-back>← Back</button>
+        <button class="ghost" id="replayBtn">Replay our story</button>
+      </div>
     </section>
   </main>
 
   <aside class="cat-companion" id="catCompanion" aria-label="Tap the dancing cat for a message">
-    <div class="cat-bubble" id="catBubble">Psst... peep! Tap me ♡</div>
+    <div class="cat-bubble" id="catBubble" aria-live="polite"></div>
     <button class="cat-button" id="catButton" aria-label="Make the cat dance">
       <img id="catImage" src="assets/chibi-cat-frame-0.png" alt="A round chibi black kitten sitting in the corner" />
     </button>
@@ -104,6 +158,16 @@
     <source src="assets/this-is-how-you-fall-in-love.mp3" type="audio/mpeg" />
   </audio>
   <div class="heart-layer" id="heartLayer" aria-hidden="true"></div>
+
+  <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Memory">
+    <figure>
+      <div id="lightboxMedia"></div>
+      <figcaption id="lightboxCaption"></figcaption>
+    </figure>
+    <button class="lightbox-close" id="lightboxClose" aria-label="Close">×</button>
+  </div>
+  <canvas class="confetti" id="confetti" aria-hidden="true"></canvas>
+  <div class="chapter-bloom" id="chapterBloom" aria-hidden="true"></div>
 
   <div class="progress" aria-hidden="true"><span id="progressBar"></span></div>
   <script src="script.js"></script>
