@@ -65,6 +65,16 @@ document.getElementById("openBtn").addEventListener("click", () => {
   setTimeout(() => showChapter("memories"), 1150);
 });
 document.querySelectorAll("[data-next]").forEach(btn => btn.addEventListener("click", () => showChapter(btn.dataset.next)));
+
+// The letter can be opened from the quiz or the gift, and Back returns to wherever she was
+let letterReturn = "finale";
+const letterBackLabels = { game: "← Back to the questions", finale: "← Back to your gift" };
+document.querySelectorAll("[data-letter]").forEach(btn => btn.addEventListener("click", () => {
+  letterReturn = currentChapter;
+  document.querySelectorAll("[data-letter-back]").forEach(back => back.textContent = letterBackLabels[letterReturn] || "← Back");
+  showChapter("letter");
+}));
+document.querySelectorAll("[data-letter-back]").forEach(btn => btn.addEventListener("click", () => showChapter(letterReturn)));
 document.getElementById("replayBtn").addEventListener("click", () => {
   tries = 2; bonusUnlocked = false; updateTries();
   document.getElementById("envelope").classList.remove("open");

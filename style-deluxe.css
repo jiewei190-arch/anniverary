@@ -327,3 +327,9 @@ body {
 /* The cat stays quiet until she taps it */
 .cat-bubble { visibility: hidden; opacity: 0; transition: opacity .4s ease, visibility 0s linear .4s; }
 .cat-bubble.show { visibility: visible; opacity: 1; transition: opacity .2s ease; }
+
+/* Letter can be opened early and closed again */
+.letter-open { margin-top: 22px; }
+.letter-back { align-self: flex-start; margin: 0 0 18px; color: var(--muted); font: 600 .9rem "DM Sans", sans-serif; }
+.letter-back:hover { color: var(--ink); }
+.letter-actions { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; }

@@ -101,6 +101,7 @@
         </div>
         <p class="feedback" id="feedback" aria-live="polite"></p>
       </div>
+      <button class="ghost letter-open" data-letter>Read my letter ✉</button>
     </section>
 
     <section class="scene finale hidden" id="finale">
@@ -120,10 +121,11 @@
         <p id="giftDescription">You chose perfectly, baobei.</p>
       </div>
       <p class="final-note">I love you. Happy October 2nd, princess. ♡</p>
-      <button class="primary" data-next="letter">One last thing… <span>✉</span></button>
+      <button class="primary" data-letter>One last thing… <span>✉</span></button>
     </section>
 
     <section class="scene letter hidden" id="letter">
+      <button class="back letter-back" data-letter-back>← Back</button>
       <div class="chapter-label"><span>05</span> A letter for you</div>
       <article class="letter-card">
         <p class="script">My peep,</p>
@@ -135,7 +137,10 @@
         <p>Here’s to more trips, more photos, more late-night talks, and more of us. I love you so much.</p>
         <p class="signature">Forever yours,<br><span>Jie</span></p>
       </article>
-      <button class="ghost" id="replayBtn">Replay our story</button>
+      <div class="letter-actions">
+        <button class="primary" data-letter-back>← Back</button>
+        <button class="ghost" id="replayBtn">Replay our story</button>
+      </div>
     </section>
   </main>
 
