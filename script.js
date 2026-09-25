@@ -760,9 +760,8 @@ function openLightbox(mediaEl, caption) {
   const copy = mediaEl.cloneNode(true);
   media.appendChild(copy);
   if (copy.tagName === "VIDEO") {
-    // Full edit with sound: our song steps aside while it plays
-    copy.muted = false; copy.loop = false; copy.controls = true; copy.removeAttribute("muted");
-    musicUnderVideo(copy);
+    // The edit has no soundtrack of its own, so our song simply carries on under it
+    copy.loop = false; copy.controls = true;
     copy.currentTime = 0;
     copy.play().catch(() => {});
   }
