@@ -44,7 +44,7 @@ const memories = [
   { file: "assets/photo-7.jpg", caption: "You did that without warning", fallback: "without warning" },
   { file: "assets/photo-8.jpg", caption: "You, and everyone else looking the wrong way", fallback: "the prettiest girl there" },
   { file: "assets/photo-9.jpg", caption: "The ring ♡", fallback: "the ring" },
-  { file: "assets/photo-10.jpg", caption: "Us, always", fallback: "us, always ♡" }
+  { file: "assets/our-edit.mp4", video: true, caption: "Us, always", fallback: "our edit is on its way ♡" }
 ];
 
 // One word hides on the back of each photo; turning them all over spells the sentence
@@ -102,12 +102,21 @@ memories.forEach((m, i) => {
   card.style.setProperty("--tilt", `${[-2, 2, -1, 1.5, -1.5, 2.5, -2.5, 1, -1, 1.5][i % 10]}deg`);
   const flip = document.createElement("div"); flip.className = "photo-flip";
   const front = document.createElement("div"); front.className = "photo-face photo-front";
-  const img = new Image(); img.src = m.file; img.alt = m.caption;
+  let img;
+  if (m.video) {
+    // The edit plays silently on the polaroid like a live photo; the zoom button opens it with sound
+    img = document.createElement("video");
+    Object.assign(img, { src: m.file, muted: true, loop: true, autoplay: true, playsInline: true, preload: "metadata" });
+    img.setAttribute("muted", ""); img.setAttribute("playsinline", ""); img.setAttribute("aria-label", m.caption);
+    img.className = "photo-video";
+  } else {
+    img = new Image(); img.src = m.file; img.alt = m.caption;
+  }
   img.onerror = () => { const f = document.createElement("div"); f.className = "photo-fallback"; f.textContent = m.fallback; img.replaceWith(f); };
   const caption = document.createElement("p"); caption.textContent = m.caption;
   const zoom = document.createElement("button");
   zoom.className = "photo-zoom"; zoom.textContent = "⤢"; zoom.setAttribute("aria-label", "See this photo bigger");
-  zoom.addEventListener("click", event => { event.stopPropagation(); openLightbox(front.querySelector("img, .photo-fallback"), m.caption); });
+  zoom.addEventListener("click", event => { event.stopPropagation(); openLightbox(front.querySelector("img, video, .photo-fallback"), m.caption); });
   const turn = document.createElement("span"); turn.className = "photo-turn"; turn.textContent = "tap to turn over ↻";
   front.append(img, caption, zoom, turn);
   const back = document.createElement("div"); back.className = "photo-face photo-back";
@@ -707,12 +716,26 @@ const lightbox = document.getElementById("lightbox");
 function openLightbox(mediaEl, caption) {
   const media = document.getElementById("lightboxMedia");
   media.innerHTML = "";
-  media.appendChild(mediaEl.cloneNode(true));
+  const copy = mediaEl.cloneNode(true);
+  media.appendChild(copy);
+  if (copy.tagName === "VIDEO") {
+    // Full edit with sound: our song steps aside while it plays
+    copy.muted = false; copy.loop = false; copy.controls = true; copy.removeAttribute("muted");
+    copy.addEventListener("play", () => { lightboxMusicWasPlaying = !music.paused; music.pause(); updateMusicButton(false); });
+    copy.addEventListener("pause", () => { if (lightboxMusicWasPlaying) startMusic(); });
+    copy.currentTime = 0;
+    copy.play().catch(() => {});
+  }
   document.getElementById("lightboxCaption").textContent = caption;
   lightbox.classList.add("show");
   burstHearts(6);
 }
-function closeLightbox() { lightbox.classList.remove("show"); }
+let lightboxMusicWasPlaying = false;
+function closeLightbox() {
+  const playing = document.querySelector("#lightboxMedia video");
+  if (playing) playing.pause();
+  lightbox.classList.remove("show");
+}
 document.getElementById("lightboxClose").addEventListener("click", closeLightbox);
 lightbox.addEventListener("click", event => { if (event.target === lightbox) closeLightbox(); });
 document.addEventListener("keydown", event => { if (event.key === "Escape") closeLightbox(); });
