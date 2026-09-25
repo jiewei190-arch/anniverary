@@ -43,8 +43,12 @@ const memories = [
   { file: "assets/photo-6.jpg", caption: "Freezing, and you brought him along", fallback: "freezing" },
   { file: "assets/photo-7.jpg", caption: "You did that without warning", fallback: "without warning" },
   { file: "assets/photo-8.jpg", caption: "You, and everyone else looking the wrong way", fallback: "the prettiest girl there" },
-  { file: "assets/photo-9.jpg", caption: "The ring ♡", fallback: "the ring" }
+  { file: "assets/photo-9.jpg", caption: "The ring ♡", fallback: "the ring" },
+  { file: "assets/photo-10.jpg", caption: "Us, always", fallback: "us, always ♡" }
 ];
+
+// One word hides on the back of each photo; turning them all over spells the sentence
+const photoWords = ["I", "WILL", "LOVE", "YOU", "FOR", "THE", "REST", "OF", "MY", "LIFE"];
 
 function showChapter(id) {
   currentChapter = id;
@@ -91,16 +95,41 @@ video.addEventListener("loadeddata", () => document.getElementById("videoPlaceho
 video.addEventListener("error", () => document.getElementById("videoPlaceholder").style.display = "flex");
 
 const grid = document.getElementById("photoGrid");
+let photosTurned = 0;
 memories.forEach((m, i) => {
   const card = document.createElement("article");
   card.className = "photo-card photo-reveal";
-  card.style.setProperty("--tilt", `${[-2, 2, -1, 1.5, -1.5, 2.5, -2.5, 1, -1][i % 9]}deg`);
+  card.style.setProperty("--tilt", `${[-2, 2, -1, 1.5, -1.5, 2.5, -2.5, 1, -1, 1.5][i % 10]}deg`);
+  const flip = document.createElement("div"); flip.className = "photo-flip";
+  const front = document.createElement("div"); front.className = "photo-face photo-front";
   const img = new Image(); img.src = m.file; img.alt = m.caption;
   img.onerror = () => { const f = document.createElement("div"); f.className = "photo-fallback"; f.textContent = m.fallback; img.replaceWith(f); };
   const caption = document.createElement("p"); caption.textContent = m.caption;
-  card.append(img, caption); grid.appendChild(card);
-  card.addEventListener("click", () => openLightbox(card, m.caption));
+  const zoom = document.createElement("button");
+  zoom.className = "photo-zoom"; zoom.textContent = "⤢"; zoom.setAttribute("aria-label", "See this photo bigger");
+  zoom.addEventListener("click", event => { event.stopPropagation(); openLightbox(front.querySelector("img, .photo-fallback"), m.caption); });
+  const turn = document.createElement("span"); turn.className = "photo-turn"; turn.textContent = "tap to turn over ↻";
+  front.append(img, caption, zoom, turn);
+  const back = document.createElement("div"); back.className = "photo-face photo-back";
+  back.innerHTML = `<span class="photo-back-count">${i + 1} / ${photoWords.length}</span><span class="photo-back-word">${photoWords[i]}</span><span class="photo-back-heart">♡</span>`;
+  flip.append(front, back); card.append(flip); grid.appendChild(card);
+  card.addEventListener("click", () => {
+    if (!card.classList.contains("turned-once")) {
+      card.classList.add("turned-once");
+      photosTurned++;
+      document.getElementById("photoCount").textContent = photosTurned;
+      document.querySelectorAll("#photoSentence span")[i].classList.add("found");
+      if (photosTurned === memories.length) {
+        document.getElementById("photoSentence").classList.add("complete");
+        setTimeout(() => confetti(180), 400);
+      }
+    }
+    card.classList.toggle("flipped");
+    burstHearts(4);
+  });
 });
+document.getElementById("photoTotal").textContent = memories.length;
+document.getElementById("photoSentence").innerHTML = photoWords.map(w => `<span>${w}</span>`).join(" ");
 
 const secretMessages = [
   "One: you make ordinary days feel special ♡",
@@ -675,10 +704,10 @@ if (window.matchMedia("(pointer: fine)").matches) {
 
 // Memory lightbox
 const lightbox = document.getElementById("lightbox");
-function openLightbox(card, caption) {
+function openLightbox(mediaEl, caption) {
   const media = document.getElementById("lightboxMedia");
   media.innerHTML = "";
-  media.appendChild(card.firstElementChild.cloneNode(true));
+  media.appendChild(mediaEl.cloneNode(true));
   document.getElementById("lightboxCaption").textContent = caption;
   lightbox.classList.add("show");
   burstHearts(6);
